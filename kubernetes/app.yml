@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: devops-project
+data:
+  DATABASE_URL: postgresql://postgres:admin@postgres-svc:5432/fastapi_db
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+  namespace: devops-project
+data:
+  DATABASE_PASSWORD: YWRtaW4=  # Base64 encoded 'admin'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+  namespace: devops-project
+  labels:
+    app: app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: app
+          image: samoil/devops:latest  # Updated to match Docker Compose container
+          envFrom:
+            - configMapRef:
+                name: app-config
+          ports:
+            - containerPort: 8000  # Changed to FastAPI port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-svc
+  namespace: devops-project
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+      nodePort: 31000
+  type: NodePort
+  selector:
+    app: app

@@ -1,19 +1,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: movieapp-ingress
-  namespace: movieapp
+  name: app-ingress
+  namespace: devops-project
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+   spec.ingressClassName: "traefik"
 spec:
   rules:
-    - host: movieapp.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: movieapp-service
-                port:
-                  number: 80
+    -  host: devops-project.com
+       http:
+         paths:
+           - pathType: Prefix
+             path: "/"
+             backend:
+               service:
+                 name: app-svc
+                 port:
+                   number: 8080
